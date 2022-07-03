@@ -6,6 +6,7 @@ Contect : hongming666@outlook.com
 Time    : 2022/7/2 8:42
 Desc:   slide verify code
 """
+import time
 
 """
 
@@ -38,10 +39,11 @@ def main():
     # 驱动Chrome打开滑动验证码示例页面
     url = "http://www.porters.vip/captcha/jigsaw.html"
     browser = webdriver.Chrome(executable_path='../resource/chromedriver.exe')
-    WebDriverWait(browser, 10)
+    # WebDriverWait(browser, 10)
     browser.get(url=url)
+    browser.maximize_window()
     # 定位滑块
-    jigsawCircle = browser.find_element(By.ID, "jigsawCircle")
+    jigsawCircle = browser.find_element(By.CSS_SELECTOR, "#jigsawCircle")
     # 点击并保持不松开
     action = webdriver.ActionChains(browser)
     action.click_and_hold(jigsawCircle).perform()
@@ -53,14 +55,19 @@ def main():
     # 获取圆角矩阵和缺口的css
     mbk_style= sel.css('#missblock::attr("style")').get()
     tar_style = sel.css('#targetblock::attr("style")').get()
-    extract = lambda x:''.join(re.findall('left:(\d+|\d+.\d+)px', x))
+    print(mbk_style)
+    print(tar_style)
+    extract = lambda x : ''.join(re.findall('left: (\d+|\d+.\d+)px', x))
     mbk_left = extract(mbk_style)
     tar_left = extract(tar_style)
+    print(mbk_left, tar_left)
     # 计算当前拼图验证码滑块所需移动的距离
     distance = float(tar_left) - float(mbk_left)
     action.move_by_offset(distance, 0)  # 设置滑动距离
-    action.release()    # 松开鼠标
-    browser.close()
+    action.release().perform()    # 松开鼠标
+
+    # time.sleep(10)
+    browser.quit()
 
 
 if __name__ == '__main__':
